@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Money App – Functional Demo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f5fb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .phone {
+      width: 320px;
+      height: 600px;
+      background: black;
+      border-radius: 35px;
+      padding: 12px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      background: white;
+      border-radius: 25px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      background: #012169;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .content {
+      padding: 18px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .balance-box {
+      background: #e8efff;
+      padding: 18px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .balance {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    .account-card {
+      background: #f4f6ff;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .button {
+      background: #e31837;
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+
+    .button-secondary {
+      background: #012169;
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    .card {
+      background: #f4f6ff;
+      padding: 12px;
+      border-radius: 12px;
+      margin-top: 10px;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      border-top: 1px solid #ddd;
+      padding: 10px 0;
+      font-size: 13px;
+      background: #fff;
+    }
+
+    .nav div {
+      cursor: pointer;
+      font-weight: bold;
+      color: #012169;
+    }
+  </style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+      <div class="header" id="title">Money App</div>
+      <div class="content" id="app"></div>
+      <div class="nav">
+        <div onclick="showHome()">Home</div>
+        <div onclick="showSend()">Send</div>
+        <div onclick="showHistory()">Activity</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Starting balances (realistic dollars + cents)
+    let checkingBalance = 4127.63;
+    let savingsBalance = 6084.21;
+    let currentAccount = "checking";
+
+    let history = [
+      "+$1,200 Paycheck",
+      "-$45 Grocery",
+      "+$300 Transfer Received"
+    ];
+
+    const app = document.getElementById("app");
+    const title = document.getElementById("title");
+
+    function getBalance() {
+      return currentAccount === "checking" ? checkingBalance : savingsBalance;
+    }
+
+    function setBalance(newAmount) {
+      if (currentAccount === "checking") {
+        checkingBalance = newAmount;
+      } else {
+        savingsBalance = newAmount;
+      }
+    }
+
+    function formatMoney(n) {
+      // Keep it simple + consistent
+      return Number(n).toFixed(2);
+    }
+
+    function showHome() {
+      title.innerText = "Money App";
+      app.innerHTML = `
+        <div class="account-card" onclick="openAccount('checking')">
+          Checking Account<br>Balance: $${formatMoney(checkingBalance)}
+        </div>
+
+        <div class="account-card" onclick="openAccount('savings')">
+          Savings Account<br>Balance: $${formatMoney(savingsBalance)}
+        </div>
+
+        <button class="button" onclick="showSend()">Send Money</button>
+      `;
+    }
+
+    function openAccount(type) {
+      currentAccount = type;
+      const accountName = type.charAt(0).toUpperCase() + type.slice(1);
+      title.innerText = accountName + " Account";
+
+      app.innerHTML = `
+        <div class="balance-box">
+          <div>${accountName} Balance</div>
+          <div class="balance">$${formatMoney(getBalance())}</div>
+        </div>
+
+        <button class="button" onclick="showDeposit()">Deposit</button>
+        <button class="button-secondary" onclick="showWithdraw()">Withdraw</button>
+        <button class="button" onclick="showHome()">Back to Home</button>
+      `;
+    }
+
+    function showDeposit() {
+      title.innerText = "Deposit Money";
+      app.innerHTML = `
+        <div class="card">Account: ${currentAccount}</div>
+        <div class="card">Current Balance: $${formatMoney(getBalance())}</div>
+        <input class="input" id="depositAmount" type="number" step="0.01" placeholder="Enter deposit amount" />
+        <button class="button" onclick="depositMoney()">Confirm Deposit</button>
+        <button class="button-secondary" onclick="openAccount(currentAccount)">Cancel</button>
+      `;
+    }
+
+    function showWithdraw() {
+      title.innerText = "Withdraw Money";
+      app.innerHTML = `
+        <div class="card">Account: ${currentAccount}</div>
+        <div class="card">Current Balance: $${formatMoney(getBalance())}</div>
+        <input class="input" id="withdrawAmount" type="number" step="0.01" placeholder="Enter withdraw amount" />
+        <button class="button" onclick="withdrawMoney()">Confirm Withdrawal</button>
+        <button class="button-secondary" onclick="openAccount(currentAccount)">Cancel</button>
+      `;
+    }
+
+    function depositMoney() {
+      const raw = document.getElementById("depositAmount").value;
+      const amount = parseFloat(raw);
+
+      if (!raw || Number.isNaN(amount) || amount <= 0) {
+        alert("Enter a valid deposit amount");
+        return;
+      }
+
+      setBalance(getBalance() + amount);
+      history.unshift(`+$${formatMoney(amount)} Deposited into ${currentAccount}`);
+      alert(`$${formatMoney(amount)} deposited successfully`);
+      openAccount(currentAccount);
+    }
+
+    function withdrawMoney() {
+      const raw = document.getElementById("withdrawAmount").value;
+      const amount = parseFloat(raw);
+
+      if (!raw || Number.isNaN(amount) || amount <= 0) {
+        alert("Enter a valid withdrawal amount");
+        return;
+      }
+
+      if (amount > getBalance()) {
+        alert("Insufficient funds");
+        return;
+      }
+
+      setBalance(getBalance() - amount);
+      history.unshift(`-$${formatMoney(amount)} Withdrawn from ${currentAccount}`);
+      alert(`$${formatMoney(amount)} withdrawn successfully`);
+      openAccount(currentAccount);
+    }
+
+    function showSend() {
+      title.innerText = "Send Money";
+      app.innerHTML = `
+        <div class="card">From: ${currentAccount} ($${formatMoney(getBalance())})</div>
+        <input class="input" id="name" placeholder="Recipient Name" />
+        <input class="input" id="amount" placeholder="Amount ($)" type="number" step="0.01" />
+        <button class="button" onclick="sendMoney()">Send Instantly</button>
+      `;
+    }
+
+    function showHistory() {
+      title.innerText = "Activity";
+      const items = history
+        .map((item) => `<div class="card">${item}</div>`)
+        .join("");
+      app.innerHTML = items || `<div class="card">No activity yet</div>`;
+    }
+
+    function sendMoney() {
+      const name = document.getElementById("name").value.trim();
+      const raw = document.getElementById("amount").value;
+      const amount = parseFloat(raw);
+
+      if (!name || !raw || Number.isNaN(amount) || amount <= 0) {
+        alert("Enter a valid name and amount");
+        return;
+      }
+
+      if (amount > getBalance()) {
+        alert("Not enough balance");
+        return;
+      }
+
+      setBalance(getBalance() - amount);
+      history.unshift(`-$${formatMoney(amount)} Sent to ${name} from ${currentAccount}`);
+      alert(`$${formatMoney(amount)} sent to ${name} successfully`);
+      showHome();
+    }
+
+    // --------------------
+    // Tiny test runner (open DevTools Console to see results)
+    // --------------------
+    function assert(condition, message) {
+      if (!condition) throw new Error(message);
+    }
+
+    function runTests() {
+      try {
+        const origChecking = checkingBalance;
+        const origSavings = savingsBalance;
+
+        // Test 1: Deposit into checking
+        currentAccount = "checking";
+        setBalance(origChecking);
+        setBalance(getBalance() + 10);
+        assert(Math.abs(getBalance() - (origChecking + 10)) < 0.0001, "Deposit math failed for checking");
+
+        // Test 2: Withdraw from savings
+        currentAccount = "savings";
+        setBalance(origSavings);
+        setBalance(getBalance() - 25.5);
+        assert(Math.abs(getBalance() - (origSavings - 25.5)) < 0.0001, "Withdraw math failed for savings");
+
+        // Restore
+        checkingBalance = origChecking;
+        savingsBalance = origSavings;
+        currentAccount = "checking";
+
+        console.log("✅ Tests passed");
+      } catch (e) {
+        console.error("❌ Tests failed:", e);
+      }
+    }
+
+    runTests();
+    showHome();
+  </script>
+</body>
+</html>
